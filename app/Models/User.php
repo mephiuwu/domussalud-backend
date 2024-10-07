@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -18,9 +19,15 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'rut',
+        'account_verified',
+        'date_of_birth',
+        'is_active',
+        'user_type',
     ];
 
     /**
@@ -34,11 +41,20 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Tipo de datos que deben tratarse como fechas.
      *
-     * @var array<string, string>
+     * @var array
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    protected $dates = ['deleted_at', 'date_of_birth'];
+
+    /**
+     * Hash automático para la contraseña antes de guardar.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+    }
 }
