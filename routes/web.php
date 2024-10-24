@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClinicalRecordsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/clinical-record-form', [ClinicalRecordsController::class, 'formView']);
+Route::post('/clinical-record/generate/pdf', [ClinicalRecordsController::class, 'generatePDF']);
