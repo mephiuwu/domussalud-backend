@@ -39,8 +39,8 @@ class CreateClinicalRecordsTable extends Migration
             $table->text('instructions')->nullable();
 
             // Relationships
-            $table->foreignId('provider_id')->constrained('providers')->onDelete('cascade');
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->foreignId('provider_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
 
             // Timestamps and soft deletes
