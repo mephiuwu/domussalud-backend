@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FICHA ATENCIÓN CLÍNICA</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,7 +37,9 @@
             font-weight: bold;
         }
 
-        input, textarea, select {
+        input,
+        textarea,
+        select {
             flex-basis: 70%;
             padding: 8px;
             border: 1px solid #ccc;
@@ -64,6 +71,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Ficha de Atención Clínica</h1>
     <form action="/clinical-record/generate/pdf" method="POST">
@@ -72,13 +80,13 @@
         <div class="section-title">Información de Paciente</div>
 
         <div class="form-group">
-            <label for="name_patient">Nombre paciente:</label>
-            <input type="text" id="name_patient" name="name_patient">
+            <label for="name">Nombre paciente:</label>
+            <input type="text" id="name" name="name">
         </div>
 
         <div class="form-group">
-            <label for="rut_patient">RUT:</label>
-            <input type="text" id="rut_patient" name="rut_patient">
+            <label for="rut">RUT:</label>
+            <input type="text" id="rut" name="rut">
         </div>
 
         <div class="form-group">
@@ -99,7 +107,7 @@
 
         <div class="form-group">
             <label for="responsible_family_member">Familiar responsable:</label>
-            <input type="text" id="responsible_family_member" name="responsible_family_member">
+            <input type="text" placeholder="(Opcional)" id="responsible_family_member" name="responsible_family_member">
         </div>
 
         <div class="form-group">
@@ -111,27 +119,27 @@
 
         <div class="form-group">
             <label for="older_adults">Adultos Mayores:</label>
-            <input type="number" id="older_adults" name="older_adults">
+            <input type="number" placeholder="0" id="older_adults" name="older_adults">
         </div>
 
         <div class="form-group">
             <label for="minor_adults">Adultos Menores:</label>
-            <input type="number" id="minor_adults" name="minor_adults">
+            <input type="number" placeholder="0" id="minor_adults" name="minor_adults">
         </div>
 
         <div class="form-group">
             <label for="children">Niños:</label>
-            <input type="number" id="children" name="children">
+            <input type="number" placeholder="0" id="children" name="children">
         </div>
 
         <div class="form-group">
-            <label for="Medications">Medicamentos/Tratamientos:</label>
-            <textarea id="Medications" name="Medications" rows="3"></textarea>
+            <label for="medications">Medicamentos/Tratamientos:</label>
+            <textarea id="medications" placeholder="(Opcional)" name="medications" rows="3"></textarea>
         </div>
 
         <div class="form-group">
             <label for="health_history">Antecedentes morbidos de salud:</label>
-            <textarea id="health_history" name="health_history" rows="3"></textarea>
+            <textarea id="health_history" placeholder="(Opcional)" name="health_history" rows="3"></textarea>
         </div>
 
         <div class="form-group">
@@ -141,12 +149,12 @@
 
         <div class="form-group">
             <label for="anamnesis">Anamnesis:</label>
-            <textarea id="anamnesis" name="anamnesis" rows="3"></textarea>
+            <textarea id="anamnesis" placeholder="(Opcional)" name="anamnesis" rows="3"></textarea>
         </div>
 
         <div class="form-group">
             <label for="physical_examination">Exámen físico:</label>
-            <textarea id="physical_examination" name="physical_examination" rows="3"></textarea>
+            <textarea id="physical_examination" placeholder="(Opcional)" name="physical_examination" rows="3"></textarea>
         </div>
 
         <div class="form-group">
@@ -156,12 +164,12 @@
 
         <div class="form-group">
             <label for="indications">Indicaciones:</label>
-            <textarea id="indications" name="indications" rows="3"></textarea>
+            <textarea id="indications" placeholder="(Opcional)" name="indications" rows="3"></textarea>
         </div>
 
         <div class="form-group">
             <label for="others">Otros:</label>
-            <textarea id="others" name="others" rows="3"></textarea>
+            <textarea id="others" placeholder="(Opcional)" name="others" rows="3"></textarea>
         </div>
 
         <!-- Medical Information Section -->
@@ -192,6 +200,47 @@
             <button type="submit">Enviar</button>
         </div>
     </form>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const form = document.querySelector('form');
 
+            let formData = new FormData(this);
+
+            fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorResponse => {
+                            if (errorResponse.error) {
+                                Swal.fire('Error', errorResponse.error, 'error');
+                            }
+                        });
+                    }
+
+                    return response.blob().then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Ficha Clínica.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire('Error', 'Ha ocurrido un error inesperado. Por favor, intenta nuevamente.', 'error');
+                });
+        });
+    </script>
 </body>
+
 </html>

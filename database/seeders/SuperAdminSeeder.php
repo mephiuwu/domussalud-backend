@@ -15,16 +15,26 @@ class SuperAdminSeeder extends Seeder
      */
     public function run()
     {
+        $address = [
+            'street_name' => 'Av. 4 norte 455',
+            'latitude' => -36.85758291887411, 
+            'longitude' => -73.13850406058539, 
+        ];
+
         User::create([
             'first_name' => 'Admin',
             'last_name' => 'Super',
             'email' => 'ramirosaezsa@gmail.com',
             'password' => 'lupus123xD', // Hasheando la contraseña
+            'phone' => '935926523',
             'rut' => '19.990.315-2',
+            'gender' => 'male',
+            'address' => json_encode($address),
+            'marital_status' => 'Soltero',
             'account_verified' => true,
-            'date_of_birth' => '1998-08-26', // Formato Y-m-d para date
+            'birthdate' => 904104000,
             'is_active' => true,
-            'user_type' => 'superadmin', // Debe coincidir con las opciones en la migración
+            'role' => 'superadmin', // Debe coincidir con las opciones en la migración
         ]);
     }
 }

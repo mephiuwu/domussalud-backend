@@ -17,7 +17,9 @@ class CreateProvidersDetailsTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('specialization');
+            $table->integer('registration_number');
             $table->string('license_number');
+            $table->string('signature');
             $table->string('documents');
             $table->timestamps();
         });

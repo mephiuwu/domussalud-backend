@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClinicalRecords;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ClinicalRecordsController extends Controller
 {
@@ -12,36 +15,89 @@ class ClinicalRecordsController extends Controller
         return view('clinicalRecordsView');
     }
 
+    public function getClinicalRecords() {   
+        $clinicalRecords = ClinicalRecords::all();
+        return response()->json(['status' => true, 'clinicalRecords' => $clinicalRecords]);
+    }
+
     public function generatePDF(Request $request) {
         set_time_limit(0);
         $data = $request->all();
 
-        $data = [
-            'name_patient' => 'Juan Pérez',
-            'rut_patient' => '12.345.678-9',
-            'age' => 45,
-            'phone' => '+56912345678',
-            'responsible_family_member' => 'Ana Pérez',
-            'date' => now()->format('Y-m-d'),
-            'older_adults' => 2,
-            'minor_adults' => 1,
-            'children' => 1,
-            'medications' => 'Aspirina, Ibuprofeno',
-            'health_history' => 'Hipertensión, Diabetes',
-            'reason' => 'Dolor de cabeza persistente',
-            'anamnesis' => 'Paciente con dolor de cabeza durante 5 días, sin mejoría con analgésicos.',
-            'physical_examination' => 'Presión arterial 140/90, pulso 75, no fiebre.',
-            'diagnosis' => 'Cefalea tensional',
-            'indications' => 'Reposo, Paracetamol 500 mg cada 8 horas, hidratación.',
-            'others' => 'Se recomienda seguimiento en 3 días si no hay mejoría.',
-            'name_provider' => 'Dr. Carlos Rodríguez',
-            'rut_provider' => '9.876.543-2',
-            'registration_number' => '123456',
-            'signature' => 'Dr. Carlos Rodríguez'
-        ];
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'rut' => 'required',
+            'age' => 'required|integer',
+        ]);
 
-        $pdf = Pdf::loadView('pdf.clinicalRecord', ['data' => $data]);
+        $validator->setAttributeNames([
+            'name' => 'Nombre',
+            'rut' => 'RUT',
+            'age' => 'Edad',
+        ]);
+    
+        if ($validator->fails()) return response()->json(['status' => false, 'error' => $validator->errors()->first()], 422);
+
+        $lastRecord = ClinicalRecords::orderBy('number', 'desc')->first();
+
+        $number = $lastRecord ? $lastRecord->number + 1 : 1;
+        $data['number'] = $number;
+
+        $clinicalRecords = new ClinicalRecords();
+        $clinicalRecords->name = $request['name'];
+        $clinicalRecords->rut = $request['rut'];
+        $clinicalRecords->age = $request['age'];
+        $clinicalRecords->phone = $request['phone'];
+        $clinicalRecords->responsible_family_member = isset($$request['responsible_family_member']) && $request['responsible_family_member']? $request['responsible_family_member'] : 'No posee';
+        $clinicalRecords->number = $number;
+        $clinicalRecords->date = $request['date'];
+        $clinicalRecords->older_adults = isset($request['older_adults']) && $request['older_adults']? $request['older_adults'] : 0;
+        $clinicalRecords->minor_adults = isset($request['minor_adults']) && $request['minor_adults']? $request['minor_adults'] : 0;
+        $clinicalRecords->children = isset($request['children']) && $request['children']? $request['children'] : 0;
+        $clinicalRecords->medications = isset($request['medications']) && $request['medications']? $request['medications'] : 'No posee';
+        $clinicalRecords->health_history = isset($request['health_history']) && $request['health_history']? $request['health_history']: 'No posee';
+        $clinicalRecords->reason = isset($request['reason']) && $request['reason']? $request['reason'] : 'No posee';
+        $clinicalRecords->anamnesis = isset($request['anamnesis']) && $request['anamnesis']? $request['anamnesis'] : 'No posee';
+        $clinicalRecords->physical_examination = isset($request['physical_examination']) && $request['physical_examination']? $request['physical_examination'] : 'No posee';
+        $clinicalRecords->diagnosis = isset($request['diagnosis']) && $request['diagnosis']? $request['diagnosis'] : 'No posee';
+        $clinicalRecords->indications = isset($request['indications']) && $request['indications']? $request['indications'] : 'No posee';
+        $clinicalRecords->others = isset($request['others']) && $request['others']? $request['others'] : 'No posee';
+        $clinicalRecords->name_provider = $request['name_provider'];
+        $clinicalRecords->rut_provider = $request['rut_provider'];
+        $clinicalRecords->registration_number = $request['registration_number'];
+        $clinicalRecords->signature = $request['signature'];
+        $clinicalRecords->pdf_data = json_encode($data);
+        $clinicalRecords->provider_id = isset($request['provider'])? $request['provider'] : 1;
+        $clinicalRecords->patient_id = isset($request['patient'])? $request['patient'] : 1;
+        $clinicalRecords->created_by = Auth::user()? Auth::user()->id : 1;
+        $clinicalRecords->save();
+
+        $pdf = Pdf::loadView('pdf.clinicalRecord', ['data' => $clinicalRecords]);
 
         return $pdf->download('clinical_record.pdf');
+    }
+
+    public function downloadPDF($idClinicalRecords) {
+        try {
+            $clinicalRecords = ClinicalRecords::findOrFail($idClinicalRecords);
+
+            $pdfData = json_decode($clinicalRecords->pdf_data, true);
+
+            if (!$pdfData) {
+                return response()->json([
+                    'message' => 'Error al decodificar los datos del PDF'
+                ], 400);
+            }
+
+            $pdf = Pdf::loadView('pdf.clinicalRecord', ['data' => $pdfData]);
+
+            return $pdf->download('Ficha Clínica #'.$clinicalRecords->number.'.pdf');
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al generar el PDF',
+                'status' => false
+            ], 500);
+        }
+
     }
 }

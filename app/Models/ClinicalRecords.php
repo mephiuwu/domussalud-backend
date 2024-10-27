@@ -11,28 +11,28 @@ class ClinicalRecords extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'first_name',
+        'name',
         'rut',
         'age',
-        'address',
         'phone',
-        'marital_status',
-        'birthdate',
-        'profession',
-        'occupation',
-        'admission_date',
-        'medical_service',
-        'household_members',
-        'consultation_reason',
-        'medical_history',
+        'responsible_family_member',
+        'date',
+        'number',
+        'older_adults',
+        'minor_adults',
+        'children',
         'medications',
-        'allergies',
+        'health_history',
+        'reason',
         'anamnesis',
-        'physical_exam',
-        'instructions',
-        'provider_id',
-        'patient_id',
-        'created_by',
+        'physical_examination',
+        'diagnosis',
+        'indications',
+        'others',
+        'name_provider',
+        'rut_provider',
+        'registration_number',
+        'signature',
     ];
 
     // Relación con el modelo Provider (Prestador)
@@ -53,12 +53,5 @@ class ClinicalRecords extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // Definir las fechas que deben ser tratadas como Carbon instances
     protected $dates = ['birthdate', 'admission_date', 'deleted_at'];
-
-    // Método para obtener el nombre completo del paciente (opcional)
-    public function getFullNameAttribute()
-    {
-        return "{$this->first_name} {$this->last_name}";
-    }
 }

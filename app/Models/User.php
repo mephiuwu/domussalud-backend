@@ -29,7 +29,7 @@ class User extends Authenticatable implements JWTSubject
         'account_verified',
         'date_of_birth',
         'is_active',
-        'user_type',
+        'role',
     ];
 
     /**
@@ -49,6 +49,8 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $dates = ['deleted_at', 'date_of_birth'];
 
+    protected $appends = ['full_name'];
+    
     /**
      * Hash automático para la contraseña antes de guardar.
      *
@@ -80,7 +82,16 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
     public static function getAdministrators() {
         return self::whereNull('deleted_at')->get();
+    }
+
+    public function patientDetails() {
+        return $this->hasOne(PatientDetails::class);
     }
 }

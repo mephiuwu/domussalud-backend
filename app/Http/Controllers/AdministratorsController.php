@@ -45,7 +45,7 @@ class AdministratorsController extends Controller
                 'password' => Hash::make($request->input('password')),
                 'account_verified' => true,
                 'is_active' => $request->input('is_active'),
-                'user_type' => 'admin'
+                'role' => 'admin'
             ]);
 
             $administrator->save();

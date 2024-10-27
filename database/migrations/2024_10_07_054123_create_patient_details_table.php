@@ -16,8 +16,10 @@ class CreatePatientDetailsTable extends Migration
         Schema::create('patient_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->text('allergies')->nullable();
+            $table->string('responsible_family_member')->nullable();
             $table->string('insurance_provider');
-            $table->text('medical_history');
+            $table->longText('anamnesis')->nullable();
             $table->json('family_member_ids')->nullable();
             $table->timestamps();
         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -16,7 +17,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'refresh']]);
     }
 
     public function login(Request $request)
@@ -59,23 +60,32 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(Auth::refresh());
+        try {
+            return $this->respondWithToken(Auth::refresh());
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json(['error' => 'Refresh token has expired'], 401);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => 'Refresh token is invalid'], 401);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['error' => 'Refresh token is missing'], 401);
+        }
     }
 
     protected function respondWithToken($token)
     {
         $user = Auth::user();
-
+        Log::debug($user);
         $customClaims = [
             'first_name' => $user->first_name,
             'last_name' => $user->last_name,
-            'role' => $user->user_type
+            'role' => $user->role
         ];
 
-        $token = JWTAuth::claims($customClaims)->fromUser($user);
+        $access_token = JWTAuth::claims($customClaims)->fromUser($user);
 
         return response()->json([
-            'access_token' => $token,
+            'access_token' => $access_token,
+            'refresh_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
         ]);

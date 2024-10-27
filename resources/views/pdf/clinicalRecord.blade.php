@@ -113,14 +113,14 @@
         <table>
             <tr>
                 <td class="field">Nombre Paciente</td>
-                <td colspan="3">{{ $data['name_patient'] }}</td>
+                <td colspan="3">{{ $data['name'] }}</td>
                 <td class="field">N° Ficha</td>
-                <td>1111</td>
+                <td>{{$data['number']}}</td>
             </tr>
 
             <tr>
                 <td class="field">RUT</td>
-                <td>{{ $data['rut_patient'] }}</td>
+                <td>{{ $data['rut'] }}</td>
                 <td class="field">Edad</td>
                 <td>{{ $data['age'] }}</td>
                 <td class="field">Fono</td>

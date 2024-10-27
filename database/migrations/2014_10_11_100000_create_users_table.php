@@ -19,11 +19,19 @@ class CreateUsersTable extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('phone');
+            $table->string('profession')->nullable();
+            $table->string('occupation')->nullable();
             $table->string('rut')->unique();
+            $table->json('address');
+            $table->string('marital_status');
+            $table->enum('gender', ['male', 'female', 'other']);
+
             $table->boolean('account_verified')->default(false);
-            $table->date('date_of_birth');
+            $table->integer('birthdate');
             $table->boolean('is_active')->default(true);
-            $table->enum('user_type', ['patient', 'provider', 'admin', 'superadmin']);
+            $table->enum('role', ['patient', 'provider', 'admin', 'superadmin']);
+            
             $table->softDeletes();
             $table->timestamps();
         });
