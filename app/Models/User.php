@@ -87,8 +87,8 @@ class User extends Authenticatable implements JWTSubject
         return "{$this->first_name} {$this->last_name}";
     }
 
-    public static function getAdministrators() {
-        return self::whereNull('deleted_at')->get();
+    public static function getUser($role) {
+        return self::where('role', $role)->get();
     }
 
     public function patientDetails() {

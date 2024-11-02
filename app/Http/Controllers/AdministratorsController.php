@@ -12,8 +12,12 @@ class AdministratorsController extends Controller
 {
     public function getAdministrators()
     {
-        $administrators = User::getAdministrators();
-        return response()->json($administrators);
+        try {
+            $administrators = User::getUser('admin');
+            return response()->json(['status' => true, 'administrators' => $administrators]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false]);
+        }
     }
 
     public function createAdministrators(Request $request)
