@@ -29,6 +29,7 @@ class CreateUsersTable extends Migration
 
             $table->boolean('account_verified')->default(false);
             $table->integer('birthdate');
+            $table->integer('verified_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->enum('role', ['patient', 'provider', 'admin', 'superadmin']);
             

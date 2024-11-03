@@ -16,7 +16,8 @@ class CreateProvidersDetailsTable extends Migration
         Schema::create('providers_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('specialization');
+            $table->string('occupation');
+            $table->string('profession');
             $table->integer('registration_number');
             $table->string('license_number');
             $table->string('signature');
