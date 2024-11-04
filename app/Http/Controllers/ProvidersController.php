@@ -8,10 +8,23 @@ use Illuminate\Support\Facades\Log;
 
 class ProvidersController extends Controller
 {
-    public function getProviders() {
+    public function getProviders()
+    {
         try {
             $providers = User::getUser('provider');
             return response()->json(['status' => true, 'providers' => $providers]);
+        } catch (\Throwable $th) {
+            Log::debug($th->getMessage());
+            return response()->json(['status' => false]);
+        }
+    }
+
+    public function createProviders(Request $request)
+    {
+        try {
+            Log::debug($request);
+            $address = $request->input('address');
+            return response()->json(['status' => true]);
         } catch (\Throwable $th) {
             Log::debug($th->getMessage());
             return response()->json(['status' => false]);

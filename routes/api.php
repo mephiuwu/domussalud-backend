@@ -35,6 +35,7 @@ Route::get('/clinical-records/{id_clinical_records}/download', [ClinicalRecordsC
 Route::get('/patients', [PatientsController::class, 'getPatients']);
 
 Route::get('/providers', [ProvidersController::class, 'getProviders']);
+Route::post('/providers/create', [ProvidersController::class, 'createProviders']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/clinical-record/generate/pdf', [ClinicalRecordsController::class, 'generatePDF']);
