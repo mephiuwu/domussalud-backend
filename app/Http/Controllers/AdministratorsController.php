@@ -54,8 +54,6 @@ class AdministratorsController extends Controller
 
             $administrator->save();
 
-            Log::debug('Administrador creado:', $request->all());
-
             return response()->json([
                 'success' => true,
                 'message' => 'Administrador creado exitosamente',

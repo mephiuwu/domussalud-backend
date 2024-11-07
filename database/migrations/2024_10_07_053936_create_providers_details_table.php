@@ -16,12 +16,11 @@ class CreateProvidersDetailsTable extends Migration
         Schema::create('providers_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->integer('registration_number');
-            $table->string('license_number');
-            $table->string('id_card');
-            $table->string('certificate_criminal_record');
-            $table->string('signature');
-            $table->string('documents');
+            $table->integer('registration_number')->nullable();
+            $table->string('license_number')->nullable();
+            $table->string('id_card')->nullable();
+            $table->string('certificate_criminal_record')->nullable();
+            $table->string('signature')->nullable();
             $table->timestamps();
         });
     }
