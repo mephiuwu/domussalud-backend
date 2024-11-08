@@ -35,11 +35,11 @@ class ClinicalRecordsController extends Controller
             'name' => 'required',
             'rut' => 'required',
             'age' => 'required|integer',
+            'phone' => ['required', 'min:8'],
             'name_provider' => 'required',
             'rut_provider' => 'required',
             'registration_number' => 'required',
             'signature' => 'required',
-            'phone' => ['required', 'min:8']
         ]);
 
         $validator->setAttributeNames([
