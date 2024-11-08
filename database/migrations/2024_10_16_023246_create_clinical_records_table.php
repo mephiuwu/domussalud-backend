@@ -39,7 +39,7 @@ class CreateClinicalRecordsTable extends Migration
             $table->string('phone');
             $table->string('responsible_family_member');
 
-            $table->string('date'); //Fecha que se creó
+            $table->integer('date'); //Fecha que se creó
             $table->string('number'); //Fecha que se creó
 
             $table->string('older_adults'); //Adultos mayores con quien vive

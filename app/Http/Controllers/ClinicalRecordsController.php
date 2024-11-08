@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClinicalRecords;
+use App\Util\Util;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -28,13 +31,31 @@ class ClinicalRecordsController extends Controller
             'name' => 'required',
             'rut' => 'required',
             'age' => 'required|integer',
+            'name_provider' => 'required',
+            'rut_provider' => 'required',
+            'registration_number' => 'required',
+            'signature' => 'required',
+            'phone' => ['required', 'min:8']
         ]);
 
         $validator->setAttributeNames([
             'name' => 'Nombre',
             'rut' => 'RUT',
             'age' => 'Edad',
+            'name_provider' => 'Nombre de Prestador',
+            'rut_provider' => 'Rut de Prestador',
+            'registration_number' => 'N° de Registro',
+            'signature' => 'Firma',
+            'phone' => 'Número Telefónico'
         ]);
+
+        $phone = $request->input('phone');
+        $formattedPhone = Util::formatChileanPhone($phone);
+
+        $dateInput = $request->input('date') ?? now()->format('Y-m-d');
+        $dateTime = DateTime::createFromFormat('Y-m-d', $dateInput, new DateTimeZone('America/Santiago'));
+        $formattedDate = $dateTime->format('d/m/Y');
+        $timestamp = $dateTime->getTimestamp();
     
         if ($validator->fails()) return response()->json(['status' => false, 'error' => $validator->errors()->first()], 422);
 
@@ -47,10 +68,10 @@ class ClinicalRecordsController extends Controller
         $clinicalRecords->name = $request['name'];
         $clinicalRecords->rut = $request['rut'];
         $clinicalRecords->age = $request['age'];
-        $clinicalRecords->phone = $request['phone'];
+        $clinicalRecords->phone = $formattedPhone;
         $clinicalRecords->responsible_family_member = isset($$request['responsible_family_member']) && $request['responsible_family_member']? $request['responsible_family_member'] : 'No posee';
         $clinicalRecords->number = $number;
-        $clinicalRecords->date = $request['date'];
+        $clinicalRecords->date = $timestamp;
         $clinicalRecords->older_adults = isset($request['older_adults']) && $request['older_adults']? $request['older_adults'] : 0;
         $clinicalRecords->minor_adults = isset($request['minor_adults']) && $request['minor_adults']? $request['minor_adults'] : 0;
         $clinicalRecords->children = isset($request['children']) && $request['children']? $request['children'] : 0;
@@ -72,6 +93,7 @@ class ClinicalRecordsController extends Controller
         $clinicalRecords->created_by = Auth::user()? Auth::user()->id : 1;
         $clinicalRecords->save();
 
+        $clinicalRecords->date = $formattedDate;
         $pdf = Pdf::loadView('pdf.clinicalRecord', ['data' => $clinicalRecords]);
 
         return $pdf->download('clinical_record.pdf');
